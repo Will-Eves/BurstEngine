@@ -16,6 +16,8 @@ To use the engine, follow these steps:
 
 [Load Assets](#load-assets)
 
+[Using The Entity Component System](#using-the-entity-component-system)
+
 ## Dependencies
 
 There are a few libraries that this project depends on. Some are already included in the `libs` folder, and some must be downloaded into the folder.
@@ -109,3 +111,31 @@ Sounds are loaded like this:
 ```cpp
 Burst::Sound* sound = Burst::AssetManager::Load<Burst::Sound>("path/to/sound.wav");
 ```
+
+## Using The Entity Component System
+
+The entity component system consists of 3 main systems:
+
+1. Components
+2. Entities
+3. The Scene
+
+There are a few components included in the engine already, which can be found in the [Using Components](#using-components) section. Creating your own component can be done like this:
+
+```cpp
+struct MyComponent : Burst::Component{
+    virtual void Start(){
+        // called after Burst::App::Run() is called, or when the parent entity is created
+    }
+
+    virtual void Update(){
+        // runs every frame, before rendering
+    }
+
+    virtual void Destroy(){
+        // runs when the parent Entity is destroyed
+    }
+};
+```
+
+There are a 
