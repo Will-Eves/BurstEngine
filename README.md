@@ -164,6 +164,8 @@ MyComponent* myComponent1 = entity->AddComponent<MyComponent>(); // adds the MyC
 entity->RemoveComponent(myComponent1); // remove the myComponent1 instance of MyComponent from the entity
 ```
 
+Components can access their parent entity through `this->parent`.
+
 *Important Notice: Capability for more than one scene will be added in the future.*
 
 ## Using Components
@@ -383,3 +385,54 @@ Once a controller has been verified as connected, then you can access it like th
 ```cpp
 Burst::Input::Controller* controller = Burst::Input::GetController(0);
 ```
+Controllers have a few different variables that determine input. They are used like this:
+
+```cpp
+Burst::Vector2 leftStick = controller->axes[0]; // retrieves the first joystick axis from the controller
+
+if(controller->buttons[GLFW_GAMEPAD_BUTTON_A]){
+    // A button is currently down
+}
+// see GLFW website for more controller binds
+
+Burst::Vector2 leftHat = controller->hats[0]; // retrieves the first hat axis from the controller
+```
+
+## Time Management
+
+Time management is done through the `Burst::Time` namespace. Time is handled through `events` which are handled through the time namespace.
+
+Events are handled like this:
+
+```cpp
+// starts a new event 
+Burst::Time::StartEvent(
+    "Test Event" // event name
+);
+
+// returns the events current time, and then resets the events time to 0.0
+float eventTime = Burst::Time::StampEvent("Test Event");
+
+// returns the events current time
+float eventTime = Burst::Time::SnapEvent("Test Event");
+
+// returns the events current time and stops the event
+float eventTime = Burst::Time::EndEvent("Test Event");
+```
+
+There are two baseline events:
+
+1. Time
+2. DeltaTime
+
+The `Time` event returns the time since the game was started.
+
+The `DeltaTime` event returns the time since the last frame.
+
+*Important Notice*: Please don't use `StampEvent` on either of these events because they will no longer work properly.
+
+## Particle System
+
+Particle systems are handled by the `Burst::ParticleSystem` component. However, on its own, this component cannot do anything.
+
+Everything in particle systems is done through `Burst::ParticleComponent` instances.
