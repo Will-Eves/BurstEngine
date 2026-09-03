@@ -20,11 +20,15 @@ To use the engine, follow these steps:
 
 [Using Components](#using-components)
 
+[Particle System](#particle-system)
+
 [Getting User Input](#getting-user-input)
 
 [Time Management](#time-management)
 
-[Particle System](#particle-system)
+[Math Systems](#math-systems)
+
+[Misc Systems](#misc-systems)
 
 ## Dependencies
 
@@ -297,6 +301,80 @@ Adding a basic particle system to an entity looks like this:
 Burst::ParticleSystem* particleSystem = entity->AddComponent<Burst::ParticleSystem>();
 ```
 
+## Particle System
+
+Particle systems are handled by the `Burst::ParticleSystem` component. However, on its own, this component cannot do anything.
+
+Everything in particle systems is done through `Burst::ParticleComponent` instances. The basic skeleton of a particle component looks like this:
+
+```cpp
+struct MyParticleComponent : Burst::ParticleComponent{
+    virtual void Update(std::vector<Particle*>* particles){
+        // modify particles here
+    }
+};
+```
+
+Add a particle component to a particle system is done like this:
+
+```cpp
+particleSystem->AddComponent<MyParticleComponent>();
+```
+
+There are a few particle components included in the engine already:
+
+1. ParticleSpawner
+2. ParticleGravity
+3. ParticleScaler
+4. ParticleMeshRenderer
+
+The `Burst::ParticleSpawner` component is used like this:
+
+```cpp
+particleSystem->AddComponent<Burst::ParticleSpawner>(
+    0.1f, // time in seconds between particle spawn
+    5.0f, // time in seconds that a particle lives
+
+    Burst::RandomVector3(
+        Burst::Vector3(-0.5f, -0.25f, -0.5f),
+        Burst::Vector3(0.5f, 0.25f, 0.5f)
+    ), // the starting velocity range of the particles
+
+    Burst::RandomVector3(
+        Burst::Vector3(-3.0f, -3.0f, 0.0f),
+        Burst::Vector3( 3.0f,  3.0f, 0.0f)
+    ) // the starting angular velocity range of the particles
+);
+```
+
+The `Burst::ParticleGravity` component is used like this:
+
+```cpp
+particleSystem->AddComponent<Burst::ParticleGravity>(
+    Burst::Vector3(0.0f, -9.81f, 0.0f) // the gravity force applied to the particles
+);
+```
+
+The `Burst::ParticleScaler` component is used like this:
+
+```cpp
+particleSystem->AddComponent<Burst::ParticleScaler>(
+    Burst::RangeVector3(
+        Burst::Vector3(0.05f, 0.05f, 0.05f), // start scale
+        Burst::Vector3(0.0f,  0.0f,  0.0f)   // end scale
+    ) // the range vector used to scale the particles over time
+);
+```
+
+The `Burst::ParticleMeshRenderer` component is used like this:
+
+```cpp
+particleSystem->AddComponent<Burst::ParticleMeshRenderer>(
+    mesh,     // the Burst::Mesh to be used
+    material, // the Burst::Material to be used
+);
+```
+
 ## Getting User Input
 
 All user input is done through the `Burst::Input` namespace. GLFW keybinds are used in all the functions.
@@ -431,64 +509,131 @@ The `DeltaTime` event returns the time since the last frame. It can also be acce
 
 *Important Notice*: Please don't use `StampEvent` on either of these events because they will no longer work properly.
 
-## Particle System
+## Math Systems
 
-Particle systems are handled by the `Burst::ParticleSystem` component. However, on its own, this component cannot do anything.
+The math system contains vector math as well as random number generation.
 
-Everything in particle systems is done through `Burst::ParticleComponent` instances. The basic skeleton of a particle component looks like this:
+There are four types of vectors in the engine:
+
+1. Vector2
+2. Vector3
+3. RangeVector3
+4. RandomVector3
+
+The `Burst::Vector2` stores two variables, `x` and `y`. Likewise, the `Burst::Vector3` stores three variables, `x`, `y`, and `z`.
+
+Vector math can be done using normal operators like this:
 
 ```cpp
-struct MyParticleComponent : Burst::ParticleComponent{
-    virtual void Update(std::vector<Particle*>* particles){
-        // modify particles here
-    }
-};
+Burst::Vector2 a = Burst::Vector2(2.0f, 3.0f);
+Burst::Vector2 b = Burst::Vector2(0.5f, 2.0f);
+
+// basic operators between Vector2s
+Burst::Vector2 addResult = a + b;      // result: x = 2.5f, y = 5.0f
+Burst::Vector2 subtractResult = a - b; // result: x = 1.5f, y = 1.0f
+Burst::Vector2 multiplyResult = a * b; // result: x = 1.0f, y = 6.0f
+Burst::Vector2 divideResult = a / b;   // result: x = 4.0f, y = 1.5f
+
+// compound assignment operators between Vector2s
+a += b; // a: x = 2.5f, y = 5.0f
+a -= b; // a: x = 1.5f, y = 1.0f
+a *= b; // a: x = 1.0f, y = 6.0f
+a /= b; // a: x = 4.0f, y = 1.5f
+
+// basic operators between Vector2 and float
+Burst::Vector2 addResult = a + 1.0f;      // result: x = 3.0f, y = 4.0f
+Burst::Vector2 subtractResult = a - 1.0f; // result: x = 1.0f, y = 2.0f
+Burst::Vector2 multiplyResult = a * 2.0f; // result: x = 4.0f, y = 6.0f
+Burst::Vector2 divideResult = a / 2.0f;   // result: x = 1.0f, y = 1.5f
+
+// compound assignment operators between Vector2 and float
+a += 1.0f; // result: x = 3.0f, y = 4.0f
+a -= 1.0f; // result: x = 1.0f, y = 2.0f
+a *= 2.0f; // result: x = 4.0f, y = 6.0f
+a /= 2.0f; // result: x = 1.0f, y = 1.5f
 ```
 
-Add a particle component to a particle system is done like this:
+Vector components can be accessed like this:
 
 ```cpp
-particleSystem->AddComponent<MyParticleComponent>();
+Burst::Vector2 vector = Burst::Vector2(1.0f, 2.0f);
+
+float x = vector.x;
+float y = vector.y;
 ```
 
-There are a few particle components included in the engine already:
+### RangeVector3
 
-1. ParticleSpawner
-2. ParticleGravity
-3. ParticleScaler
-4. ParticleMeshRenderer
+The `Burst::RangeVector3` class contains two `Burst::Vector3` instances, and returns a value between them based on the float value provided.
 
-The `Burst::ParticleSpawner` component is used like this:
+This is done like this:
 
 ```cpp
-particleSystem->AddComponent<Burst::ParticleSpawner>(
-    0.1f, // time in seconds between particle spawn
-    5.0f, // time in seconds that a particle lives
+Burst::RangeVector3 rangeVector = Burst::RangeVector3(
+    Burst::Vector3(0.0f, 0.0f, 0.0f), // the value at 0.0f
+    Burst::Vector3(1.0f, 2.0f, 3.0f)  // the value at 1.0f
+);
 
-    Burst::RandomVector3(
-        Burst::Vector3(-0.5f, -0.25f, -0.5f),
-        Burst::Vector3(0.5f, 0.25f, 0.5f)
-    ), // the starting velocity range of the particles
+Burst::Vector3 middleValue = rangeVector.GetVector3(0.5f); // result: x = 0.5f, y = 1.0f, z = 1.5f
+```
 
-    Burst::RandomVector3(
-        Burst::Vector3(-3.0f, -3.0f, 0.0f),
-        Burst::Vector3( 3.0f,  3.0f, 0.0f)
-    ) // the starting angular velocity range of the particles
+### RandomVector3
+
+The `Burst::RandomVector3` class contains two `Burst::Vector3` instances, and returns a random value between.
+
+This is done like this:
+
+```cpp
+Burst::RandomVector3 randomVector = Burst::RandomVector3(
+    Burst::Vector3(0.0f, 0.0f, 0.0f), // the minimum values
+    Burst::Vector3(1.0f, 2.0f, 3.0f)  // the maximum values
+);
+
+Burst::Vector3 result = randomVector.GetVector3(); // result: x = 0.0f-1.0f, y = 0.0f-2.0f, z = 0.0f-3.0f
+```
+
+### Random Numbers
+
+Random numbers are accessed through the `Burst::Random` namespace.
+
+The random number generator can be seeded like this:
+
+```cpp
+Burst::Random::Seed(
+    567 // the seed of the generator
 );
 ```
 
-The `Burst::ParticleGravity` component is used like this:
+Random numbers can be generated like this:
 
 ```cpp
-particleSystem->AddComponent<Burst::ParticleGravity>(
-    Burst::Vector3(0.0f, -9.81f, 0.0f) // the gravity force applied to the particles
-);
+float randomFloat = Burst::Random::Range<float>(
+    0.0f, // minimum value
+    1.0f, // maximum value
+); // result: between 0.0f and 1.0f
+
+double randomDouble = Burst::Random::Range<double>(-2.0, 2.0); // result: between -2.0 and 2.0
+
+int randomInt = Burst::Random::Range<int>(0, 100); // result: between 0 and 100
 ```
 
-The `Burst::ParticleScaler` component is used like this:
+## Misc Systems
+
+There are a few remaining systems that do not deserve their own entire modules, so they are covered here. They are:
+
+1. [The Color Class](#the-color-class)
+
+### The Color Class
+
+The `Burst::Color` class contains four variables, `r` (red value), `g` (green value), `b` (blue value), and `a` (alpha value). All are in the range from 0.0f to 1.0f.
+
+It is used like this:
 
 ```cpp
-particleSystem->AddComponent<Burst::ParticleScaler>(
-    
+Burst::Color color = Burst::Color(
+    0.75f, // the red value
+    0.25f, // the green value
+    0.1f,  // the blue value
+    0.8f   // the alpha value
 );
 ```
