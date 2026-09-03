@@ -45,6 +45,8 @@ The basic skeleton of a Burst Engine project should look like this:
 ```cpp
 #include <burst.h>
 
+// write all your component code
+
 int main(){
     Burst::App::Setup(
         800,   // window width
