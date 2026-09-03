@@ -425,9 +425,9 @@ There are two baseline events:
 1. Time
 2. DeltaTime
 
-The `Time` event returns the time since the game was started.
+The `Time` event returns the time since the game was started. It can also be accessed using `Burst::Time::programTime`.
 
-The `DeltaTime` event returns the time since the last frame.
+The `DeltaTime` event returns the time since the last frame. It can also be accessed using `Burst::Time::deltaTime`.
 
 *Important Notice*: Please don't use `StampEvent` on either of these events because they will no longer work properly.
 
@@ -435,4 +435,60 @@ The `DeltaTime` event returns the time since the last frame.
 
 Particle systems are handled by the `Burst::ParticleSystem` component. However, on its own, this component cannot do anything.
 
-Everything in particle systems is done through `Burst::ParticleComponent` instances.
+Everything in particle systems is done through `Burst::ParticleComponent` instances. The basic skeleton of a particle component looks like this:
+
+```cpp
+struct MyParticleComponent : Burst::ParticleComponent{
+    virtual void Update(std::vector<Particle*>* particles){
+        // modify particles here
+    }
+};
+```
+
+Add a particle component to a particle system is done like this:
+
+```cpp
+particleSystem->AddComponent<MyParticleComponent>();
+```
+
+There are a few particle components included in the engine already:
+
+1. ParticleSpawner
+2. ParticleGravity
+3. ParticleScaler
+4. ParticleMeshRenderer
+
+The `Burst::ParticleSpawner` component is used like this:
+
+```cpp
+particleSystem->AddComponent<Burst::ParticleSpawner>(
+    0.1f, // time in seconds between particle spawn
+    5.0f, // time in seconds that a particle lives
+
+    Burst::RandomVector3(
+        Burst::Vector3(-0.5f, -0.25f, -0.5f),
+        Burst::Vector3(0.5f, 0.25f, 0.5f)
+    ), // the starting velocity range of the particles
+
+    Burst::RandomVector3(
+        Burst::Vector3(-3.0f, -3.0f, 0.0f),
+        Burst::Vector3( 3.0f,  3.0f, 0.0f)
+    ) // the starting angular velocity range of the particles
+);
+```
+
+The `Burst::ParticleGravity` component is used like this:
+
+```cpp
+particleSystem->AddComponent<Burst::ParticleGravity>(
+    Burst::Vector3(0.0f, -9.81f, 0.0f) // the gravity force applied to the particles
+);
+```
+
+The `Burst::ParticleScaler` component is used like this:
+
+```cpp
+particleSystem->AddComponent<Burst::ParticleScaler>(
+    
+);
+```
