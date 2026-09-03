@@ -1,0 +1,8 @@
+# Build Output
+Debug/
+Release/
+x64/
+x86/
+
+# Installed vcpkg Dependencies
+vcpkg_installed/
