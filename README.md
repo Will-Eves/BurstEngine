@@ -18,6 +18,8 @@ To use the engine, follow these steps:
 
 [Using The Entity Component System](#using-the-entity-component-system)
 
+[Using Components](#using-components)
+
 ## Dependencies
 
 There are a few libraries that this project depends on. Some are already included in the `libs` folder, and some must be downloaded into the folder.
@@ -138,4 +140,57 @@ struct MyComponent : Burst::Component{
 };
 ```
 
-There are a 
+There are a few components built into the engine that can be found in the [Using Components](#using-components) section of the documentation.
+
+Entities are the next part of the system. Components sit on top of entities. The entities themselves are added to what is called the `Burst::Scene`. Creating an entity within the scene is done like this:
+
+```cpp
+Burst::Entity* entity = Burst::Scene::AddEntity("Entity Name");
+
+entity->position = Burst::Vector3(0.0f, 5.0f, 0.0f);   // sets the position of the entity
+entity->rotation = Burst::Vector3(0.0f, 180.0f, 0.0f); // sets the rotation of the entity
+entity->scale    = Burst::Vector3(2.0f, 0.5f, 2.0f);   // sets the scale of the entity
+
+MyComponent* myComponent1 = entity->AddComponent<MyComponent>(); // adds the MyComponent component to the entity
+
+entity->RemoveComponent(myComponent1); // remove the myComponent1 instance of MyComponent from the entity
+```
+
+*Important Notice: Capability for more than one scene will be added in the future.*
+
+## Using Components
+
+There are a few different built-in components in the engine currently. They include:
+
+1. MeshRenderer
+2. Camera
+3. Light
+4. AudioSource
+5. SpriteRenderer
+6. ParticleSystem
+
+Their uses are documented in the following sections.
+
+### MeshRenderer
+
+Information!
+
+### Camera
+
+Information!
+
+### Light
+
+Information!
+
+### AudioSource
+
+Information!
+
+### SpriteRenderer
+
+Information!
+
+### ParticleSystem
+
+Information!
