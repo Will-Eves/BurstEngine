@@ -20,6 +20,12 @@ To use the engine, follow these steps:
 
 [Using Components](#using-components)
 
+[Getting User Input](#getting-user-input)
+
+[Time Management](#time-management)
+
+[Particle System](#particle-system)
+
 ## Dependencies
 
 There are a few libraries that this project depends on. Some are already included in the `libs` folder, and some must be downloaded into the folder.
@@ -166,33 +172,214 @@ There are a few different built-in components in the engine currently. They incl
 
 1. MeshRenderer
 2. Camera
-3. Light
-4. AudioSource
-5. SpriteRenderer
-6. ParticleSystem
+3. Lights (DirectionalLight, AmbientLight, PointLight)
+6. AudioSource
+7. SpriteRenderer
+8. ParticleSystem
 
 Their uses are documented in the following sections.
 
 ### MeshRenderer
 
-Information!
+The `Burst::MeshRenderer` component is vital to rendering. Mesh renderers need a `Burst::Mesh` and a `Burst::Material` provided to them. A mesh renderer can be added to an entity like this:
+
+```cpp
+entity->AddComponent<Burst::MeshRenderer>(
+    mesh,    // the Burst::Mesh to be used by the MeshRenderer
+    material // the Burst::Material to be used by the MeshRenderer
+);
+```
 
 ### Camera
 
-Information!
+The `Burst::Camera` component is also vital to rendering. For anything to render to the screen, there must be an entity with a `Burst::Camera` component attached to it. A camera can be added to an entity like this:
 
-### Light
+```cpp
+entity->AddComponent<Burst::Camera>(
+    70.0f, // the cameras verticle fov
+    0.01f, // the cameras near clip plane
+    100.0f // the cameras far clip plane
+);
+```
 
-Information!
+### Lights
+
+There are a 3 different types of lights:
+
+1. DirectionalLight
+2. AmbientLight
+3. PointLight
+
+Directional lights are created like this:
+
+```cpp
+Burst::DirectionalLight* light = lightEntity->AddComponent<Burst::DirectionalLight>();
+
+light->color = Burst::Color(1.0f, 0.0f, 0.0f); // sets the color of the DirectionalLight
+light->intensity = 1.0f;                       // sets the intensity of the DirectionalLight
+
+/*
+The position of the light entity determines the direction of the light.
+
+This means that lighting is applied to each fragment as if the directional light was lightEntity->position away from the fragment (y position inverted).
+*/
+lightEntity->position = Burst::Vector3(-0.5f, -0.5f, -0.5f);
+```
+
+Ambient lights are created like this:
+
+```cpp
+Burst::AmbientLight* light = lightEntity->AddComponent<Burst::AmbientLight>();
+
+light->color = Burst::Color(1.0f, 0.0f, 0.0f); // sets the color of the AmbientLight
+light->intensity = 1.0f;                       // sets the intensity of the AmbientLight
+```
+
+Point lights are created like this:
+
+```cpp
+Burst::PointLight* light = lightEntity->AddComponent<Burst::PointLight>();
+
+light->color = Burst::Color(1.0f, 0.0f, 0.0f); // sets the color of the PointLight
+light->intensity = 1.0f;                       // sets the intensity of the PointLight
+light->radius = 5.0f;                          // sets the radius of the PointLight (the furthest part the light reaches)
+
+lightEntity->position = Burst::Vector3(10.0f, 2.0f, 0.0f); // set the position of the point light
+```
 
 ### AudioSource
 
-Information!
+The `Burst::AudioSource` component is used to play sounds from a specific entity. It can be used like this:
+
+```cpp
+Burst::AudioSourece* audioSource = entity->AddComponent<Burst::AudioSource>(
+    sound // the sound to be used by the audio source
+);
+
+audioSource->Play(); // play the sound
+audioSource->Stop(); // stops the sound
+
+audioSource->SetVolume(0.5f); // sets the volume of the sound
+audioSource->SetPitch(1.5f);  // sets the pitch of the sound
+```
+
+*Alternatively* you can simply play sound from the `Burst::Sound` asset itself like this:
+
+```cpp
+sound->Play(); // play the sound
+sound->Stop(); // stops the sound
+
+sound->SetVolume(0.5f); // sets the volume of the sound
+sound->SetPitch(1.5f);  // sets the pitch of the sound
+```
 
 ### SpriteRenderer
 
-Information!
+The `Burst::SpriteRenderer` component is used to render 2D sprites to the screen. It can be used like this:
+
+```cpp
+Burst::SpriteRenderer* spriteRenderer = entity->AddComponent<Burst::SpriteRenderer>(
+    texture // the texture rendered by the SpriteRenderer
+);
+
+spriteRenderer->color = Burst::Color(1.0f, 0.0f, 0.0f); // tints the sprite
+```
 
 ### ParticleSystem
 
-Information!
+The `Burst::ParticleSystem` component is fairly complex and will be fully covered in the [Particle System](#particle-system) section of the documentation.
+
+Adding a basic particle system to an entity looks like this:
+
+```cpp
+Burst::ParticleSystem* particleSystem = entity->AddComponent<Burst::ParticleSystem>();
+```
+
+## Getting User Input
+
+All user input is done through the `Burst::Input` namespace. GLFW keybinds are used in all the functions.
+
+### Keyboard Input
+
+Key input is read like this:
+
+```cpp
+if(Burst::Input::GetKeyDown(GLFW_KEY_A)){
+    // 'a' key is currently down (true as long as key is down)
+}
+
+if(Burst::Input::GetKeyPressed(GLFW_KEY_A)){
+    // 'a' key was clicked (only true for the first frame the key is down)
+}
+
+if(Burst::Input::GetKeyUp(GLFW_KEY_A)){
+    // 'a' key is currently up (true whenever the current key is not down)
+}
+
+if(Burst::Input::GetKeyReleased(GLFW_KEY_A)){
+    // 'a' key released (only true for the first frame the key is up)
+}
+```
+
+General WASD and Arrow Key input is read like this:
+
+```cpp
+double horizontalAxis = Burst::Input::GetHorizontal(); // returns a value from -1.0 to 1.0 depending on input
+double verticleAxis = Burst::Input::GetVertical();     // returns a value from -1.0 to 1.0 depending on input
+```
+
+### Mouse Input
+
+The mouse position is read like this:
+
+```cpp
+Burst::Vector2 mousePosition = Burst::Input::GetMousePosition();
+```
+
+Changing cursor properties is done like this:
+
+```cpp
+Burst::Input::HideCursor(); // disables mouse cursor graphics
+Burst::Input::ShowCursor(); // enables mouse cursor graphics
+
+Burst::Input::DisableCursor(); // locks the mouse cursor and hides it
+Burst::Input::EnableCursor();  // unlocks the mouse cursor and shows it
+```
+
+Mouse button input is read like this:
+
+```cpp
+if(Burst::Input::MouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)){
+    // left click is currently down (true as long as the button is down)
+}
+
+if(Burst::Input::MouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT)){
+    // left click was cliked (only true for the first frame the button is down)
+}
+
+if(Burst::Input::MouseButtonUp(GLFW_MOUSE_BUTTON_LEFT)){
+    // left click is currently up (true as long as the button is not down)
+}
+
+if(Burst::Input::MouseButtonReleased(GLFW_MOUSE_BUTTON_LEFT)){
+    // left click was released (only true for the first frame the button is up)
+}
+```
+
+### Controller Input
+
+Controller input is managed through `Burst::Input::Controller` instances. The `Burst::Input` system manages these controllers automatically.
+
+Controllers should be checked to see if they are connected before they are used. There are 16 available controllers (0-15). This is done like this:
+
+```cpp
+if(Burst::Input::GetControllerActive(0)){
+    // controller 0 is active
+}
+```
+
+Once a controller has been verified as connected, then you can access it like this:
+
+```cpp
+Burst::Input::Controller* controller = Burst::Input::GetController(0);
+```
