@@ -134,7 +134,9 @@ The entity component system consists of 3 main systems:
 2. Entities
 3. The Scene
 
-There are a few components included in the engine already, which can be found in the [Using Components](#using-components) section. Creating your own component can be done like this:
+There are a few components included in the engine already, which can be found in the [Using Components](#using-components) section.
+
+Creating your own `Burst::Component` can be done like this:
 
 ```cpp
 struct MyComponent : Burst::Component{
@@ -625,7 +627,7 @@ There are a few remaining systems that do not deserve their own entire modules, 
 
 ### The Color Class
 
-The `Burst::Color` class contains four variables, `r` (red value), `g` (green value), `b` (blue value), and `a` (alpha value). All are in the range from 0.0f to 1.0f.
+The `Burst::Color` class contains four variables, `r`, `g`, `b`, and `a`. All are in the range from `0.0f` to `1.0f`.
 
 It is used like this:
 
